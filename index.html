@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask + React Demo</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        button { margin: 10px 0; padding: 10px 20px; cursor: pointer; }
+        .response { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        input { padding: 8px; margin: 5px; width: 200px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [response, setResponse] = useState('');
+            const [name, setName] = useState('');
+            const [loading, setLoading] = useState(false);
+
+            const fetchHello = async () => {
+                setLoading(true);
+                try {
+                    const res = await fetch('http://localhost:5000/api/hello');
+                    const data = await res.json();
+                    setResponse(JSON.stringify(data, null, 2));
+                } catch (error) {
+                    setResponse('Error: ' + error.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const sendName = async () => {
+                if (!name.trim()) return;
+                setLoading(true);
+                try {
+                    const res = await fetch('http://localhost:5000/api/echo', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name: name.trim() })
+                    });
+                    const data = await res.json();
+                    setResponse(JSON.stringify(data, null, 2));
+                } catch (error) {
+                    setResponse('Error: ' + error.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div className="container">
+                    <h1>Flask + React Communication Demo</h1>
+                    
+                    <div>
+                        <button onClick={fetchHello} disabled={loading}>
+                            {loading ? 'Loading...' : 'Get Hello from Flask'}
+                        </button>
+                    </div>
+
+                    <div>
+                        <input 
+                            type="text" 
+                            value={name} 
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Enter your name"
+                        />
+                        <button onClick={sendName} disabled={loading || !name.trim()}>
+                            {loading ? 'Sending...' : 'Send Name to Flask'}
+                        </button>
+                    </div>
+
+                    {response && (
+                        <div className="response">
+                            <h3>Response from Flask:</h3>
+                            <pre>{response}</pre>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
