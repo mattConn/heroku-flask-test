@@ -29,7 +29,7 @@
             const fetchHello = async () => {
                 setLoading(true);
                 try {
-                    const res = await fetch('http://localhost:5000/api/hello');
+                    const res = await fetch('/api/hello');
                     const data = await res.json();
                     setResponse(JSON.stringify(data, null, 2));
                 } catch (error) {
@@ -43,7 +43,7 @@
                 if (!name.trim()) return;
                 setLoading(true);
                 try {
-                    const res = await fetch('http://localhost:5000/api/echo', {
+                    const res = await fetch('/api/echo', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
